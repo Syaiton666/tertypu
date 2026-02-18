@@ -53,10 +53,54 @@ video{
 </div>
 
 <div class="video-box">
-  <video autoplay muted loop playsinline controls preload="auto">
+  <video id="video" autoplay muted loop playsinline controls preload="auto">
     <source src="./vid.mp4" type="video/mp4">
   </video>
 </div>
+
+<script>
+const video = document.getElementById("video");
+
+// Pastikan autoplay muted jalan
+window.addEventListener("load", async () => {
+  try { await video.play(); } catch(e){}
+});
+
+let unlocked = false;
+
+async function unlockSound() {
+  if (unlocked) return;
+
+  try {
+    video.muted = false;      // unmute
+    video.volume = 1.0;       // max volume
+
+    // penting: play() lagi setelah unmute
+    await video.play();
+
+    unlocked = true;
+    removeListeners();
+    console.log("Suara berhasil diaktifkan");
+  } catch (e) {
+    console.log("Browser masih blokir:", e);
+  }
+}
+
+// Event yang PALING aman untuk unlock audio
+function addListeners(){
+  document.addEventListener("click", unlockSound);
+  document.addEventListener("touchstart", unlockSound);
+  document.addEventListener("keydown", unlockSound);
+}
+
+function removeListeners(){
+  document.removeEventListener("click", unlockSound);
+  document.removeEventListener("touchstart", unlockSound);
+  document.removeEventListener("keydown", unlockSound);
+}
+
+addListeners();
+</script>
 
 </body>
 </html>
