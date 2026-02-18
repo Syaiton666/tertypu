@@ -24,10 +24,7 @@ body{
   text-align:center;
 }
 
-.quiz-box img{
-  width:100%;
-  margin-top:10px;
-}
+.quiz-box img{ width:100%; margin-top:10px; }
 
 .video-box{
   margin-top:40px;
@@ -58,24 +55,49 @@ video{ width:100%; background:#000; }
 <script>
 const video = document.getElementById("video");
 
-// 1) Paksa autoplay (muted) saat load — ini yang paling kompatibel
 window.addEventListener("load", async () => {
   try { await video.play(); } catch (e) {}
 });
 
-// 2) Tanpa UI: begitu user tap/click di mana pun, nyalakan suara
-function enableSound(){
+let armed = true;
+
+function tryEnableSound() {
+  if (!armed) return;
+
+  // coba unmute + play
   video.muted = false;
   video.volume = 1;
-  video.play().catch(() => {});
-  window.removeEventListener("pointerdown", enableSound);
-  window.removeEventListener("touchstart", enableSound);
-  window.removeEventListener("click", enableSound);
+
+  video.play().then(() => {
+    // sukses -> lepas semua listener
+    armed = false;
+    removeArmEvents();
+  }).catch(() => {
+    // kalau masih diblokir, biarkan armed = true
+    // (akan coba lagi pada interaksi berikutnya)
+  });
 }
 
-window.addEventListener("pointerdown", enableSound, { once:true });
-window.addEventListener("touchstart", enableSound, { once:true });
-window.addEventListener("click", enableSound, { once:true });
+function addArmEvents(){
+  // Interaksi paling umum
+  window.addEventListener("pointerdown", tryEnableSound, { passive:true });
+  window.addEventListener("touchstart", tryEnableSound, { passive:true });
+  window.addEventListener("mousedown", tryEnableSound, { passive:true });
+  window.addEventListener("keydown", tryEnableSound);
+  window.addEventListener("wheel", tryEnableSound, { passive:true });     // scroll mouse
+  window.addEventListener("scroll", tryEnableSound, { passive:true });    // scroll page (kadang tidak dianggap gesture di iOS)
+}
+
+function removeArmEvents(){
+  window.removeEventListener("pointerdown", tryEnableSound);
+  window.removeEventListener("touchstart", tryEnableSound);
+  window.removeEventListener("mousedown", tryEnableSound);
+  window.removeEventListener("keydown", tryEnableSound);
+  window.removeEventListener("wheel", tryEnableSound);
+  window.removeEventListener("scroll", tryEnableSound);
+}
+
+addArmEvents();
 </script>
 
 </body>
