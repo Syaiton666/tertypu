@@ -24,7 +24,10 @@ body{
   text-align:center;
 }
 
-.quiz-box img{ width:100%; margin-top:10px; }
+.quiz-box img{
+  width:100%;
+  margin-top:10px;
+}
 
 .video-box{
   margin-top:40px;
@@ -35,7 +38,10 @@ body{
   padding:10px;
 }
 
-video{ width:100%; background:#000; }
+video{
+  width:100%;
+  background:#000;
+}
 </style>
 </head>
 
@@ -55,49 +61,72 @@ video{ width:100%; background:#000; }
 <script>
 const video = document.getElementById("video");
 
+// Pastikan autoplay muted jalan
 window.addEventListener("load", async () => {
-  try { await video.play(); } catch (e) {}
+  try { await video.play(); } catch(e){}
 });
 
-let armed = true;
+let unlocked = false;
 
-function tryEnableSound() {
-  if (!armed) return;
+async function unlockSound() {
+  if (unlocked) return;
 
-  // coba unmute + play
-  video.muted = false;
-  video.volume = 1;
+  try {
+    video.muted = false;
+    video.volume = 1;
+    await video.play();
+    unlocked = true;
+    removeListeners();
+  } catch(e) {
+    // kalau masih gagal, akan coba lagi di event berikutnya
+  }
+}
 
-  video.play().then(() => {
-    // sukses -> lepas semua listener
-    armed = false;
-    removeArmEvents();
-  }).catch(() => {
-    // kalau masih diblokir, biarkan armed = true
-    // (akan coba lagi pada interaksi berikutnya)
+function addListeners(){
+  const events = [
+    "click",
+    "mousedown",
+    "mouseup",
+    "pointerdown",
+    "pointerup",
+    "touchstart",
+    "touchend",
+    "keydown",
+    "keyup",
+    "wheel",
+    "scroll",
+    "mousemove",
+    "pointermove"
+  ];
+
+  events.forEach(evt => {
+    window.addEventListener(evt, unlockSound, { passive: true });
   });
 }
 
-function addArmEvents(){
-  // Interaksi paling umum
-  window.addEventListener("pointerdown", tryEnableSound, { passive:true });
-  window.addEventListener("touchstart", tryEnableSound, { passive:true });
-  window.addEventListener("mousedown", tryEnableSound, { passive:true });
-  window.addEventListener("keydown", tryEnableSound);
-  window.addEventListener("wheel", tryEnableSound, { passive:true });     // scroll mouse
-  window.addEventListener("scroll", tryEnableSound, { passive:true });    // scroll page (kadang tidak dianggap gesture di iOS)
+function removeListeners(){
+  const events = [
+    "click",
+    "mousedown",
+    "mouseup",
+    "pointerdown",
+    "pointerup",
+    "touchstart",
+    "touchend",
+    "keydown",
+    "keyup",
+    "wheel",
+    "scroll",
+    "mousemove",
+    "pointermove"
+  ];
+
+  events.forEach(evt => {
+    window.removeEventListener(evt, unlockSound);
+  });
 }
 
-function removeArmEvents(){
-  window.removeEventListener("pointerdown", tryEnableSound);
-  window.removeEventListener("touchstart", tryEnableSound);
-  window.removeEventListener("mousedown", tryEnableSound);
-  window.removeEventListener("keydown", tryEnableSound);
-  window.removeEventListener("wheel", tryEnableSound);
-  window.removeEventListener("scroll", tryEnableSound);
-}
-
-addArmEvents();
+addListeners();
 </script>
 
 </body>
