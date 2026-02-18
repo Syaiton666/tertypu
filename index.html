@@ -53,81 +53,10 @@ video{
 </div>
 
 <div class="video-box">
-  <video id="video" autoplay muted loop playsinline controls preload="auto">
+  <video autoplay muted loop playsinline controls preload="auto">
     <source src="./vid.mp4" type="video/mp4">
   </video>
 </div>
-
-<script>
-const video = document.getElementById("video");
-
-// Pastikan autoplay muted jalan
-window.addEventListener("load", async () => {
-  try { await video.play(); } catch(e){}
-});
-
-let unlocked = false;
-
-async function unlockSound() {
-  if (unlocked) return;
-
-  try {
-    video.muted = false;
-    video.volume = 1;
-    await video.play();
-    unlocked = true;
-    removeListeners();
-  } catch(e) {
-    // kalau masih gagal, akan coba lagi di event berikutnya
-  }
-}
-
-function addListeners(){
-  const events = [
-    "click",
-    "mousedown",
-    "mouseup",
-    "pointerdown",
-    "pointerup",
-    "touchstart",
-    "touchend",
-    "keydown",
-    "keyup",
-    "wheel",
-    "scroll",
-    "mousemove",
-    "pointermove"
-  ];
-
-  events.forEach(evt => {
-    window.addEventListener(evt, unlockSound, { passive: true });
-  });
-}
-
-function removeListeners(){
-  const events = [
-    "click",
-    "mousedown",
-    "mouseup",
-    "pointerdown",
-    "pointerup",
-    "touchstart",
-    "touchend",
-    "keydown",
-    "keyup",
-    "wheel",
-    "scroll",
-    "mousemove",
-    "pointermove"
-  ];
-
-  events.forEach(evt => {
-    window.removeEventListener(evt, unlockSound);
-  });
-}
-
-addListeners();
-</script>
 
 </body>
 </html>
